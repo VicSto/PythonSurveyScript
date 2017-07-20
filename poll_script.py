@@ -29,7 +29,6 @@ class SurveyCounter:
     def __init__(self, filename):
 
         self.score = 0.0
-        print(filename)
         self.title = filename.split(".csv")[0]
         
         self.file = open(filename, 'r')
@@ -90,7 +89,6 @@ class SurveyCounter:
                     self.data[self.items[i]] += float(0.25)
                 elif(self.item[i] == 'No' or self.item[i] == 'Not Good'):
                     self.data[self.items[i]] += float(0.0)
-
         self.setScore()
         self.file.close()
 
@@ -117,22 +115,25 @@ class pollScriptUI:
         self.root = Tk()
         self.root.title("Poll Results")
         self.root.config(width = 600, height = 400)
+        self.root.resizable(False, False)
         self.datalabel = Text(self.root, bg = "#293134", foreground = "#C0C0C0", font = ("Arial", 18))
-        self.datalabel.grid(row = 0, column = 0, rowspan=2, sticky="nsw")
+        self.datalabel.grid(row = 0, column = 0, rowspan=3, sticky="nsw")
 
-        self.histbutton = Button(self.root, text="Visualize Results", font = "Arial", command = self.hist_generate).grid(row=0, column=1)
+        self.histbutton = Button(self.root, text="Visualize Results", font = "Arial", command = self.hist_generate).grid(row=0, column=1,sticky='nswe')
 
-        self.exitbutton = Button(self.root, text="Exit", font = "Arial", command = self.root.destroy).grid(row=1,column=1)
+        self.printbutton = Button(self.root, text="Print Scores", font = "Arial", command = self.print_scores).grid(row=1,column=1,sticky='nswe')
+
+        self.exitbutton = Button(self.root, text="Exit", font = "Arial", command = self.root.destroy, ).grid(row=2,column=1,sticky='nswe')
         
         sys.stdout = TextRedirector(self.datalabel, "cout")
         
         print("Innovation Day Poll Script")
         print("by Victor Stolle\n")
         self.surveys = []
-        print("Survey Titles:")
+        self.winners = []
+        
         for file in os.listdir(os.getcwd()):
             if file.endswith(".csv"):
-                print("Title:", file)
                 self.surveys.append(SurveyCounter(file))
         print()
         self.calc()
@@ -140,20 +141,70 @@ class pollScriptUI:
 
     def calc(self):
         if len(self.surveys) > 1:
-            self.winners = []
             for survey in self.surveys:
                 self.winners.append((survey.title, survey.score))
-                survey.print_results()
+
 
             self.winners = sorted(self.winners, key= lambda winner: winner[1], reverse=True)      
             print("Rankings:\t\t\t\tScore:")
             for i in range(len(self.winners)):
-                print(str(i+1) + ": Team", self.winners[i][0],"\t\t\t\t{:.0f}".format(self.winners[i][1]) + "%")
-
+                print(str(i+1) + ": Team", self.winners[i][0],"\t\t\t\t{:.2f}".format(self.winners[i][1]))
             if(self.winners[0][1] == self.winners[1][1]):
                 print("Result: Tie")
             else:
-                print("Result: Winner Team", self.winners[0][0])
+                print("Result: Winner ", self.winners[0][0])
+
+    def print_scores(self):
+        print('\nQuestion 1:')
+        self.score_string = '\n'
+        for choice in ["Excellent", "Good", "Incomplete", "Not Good"]:
+            self.score_string += '\t\t' + choice
+        self.score_string += '\n'
+        for survey in self.surveys:
+            self.score_string += survey.title + '\t\t'
+            for k,v in survey.q1_responses.items():
+                if k == 'Not Good':
+                    self.score_string += str(v)
+                else:
+                    self.score_string += str(v) + '\t\t'
+            self.score_string += '\n'
+        print(self.score_string)
+
+        print('Question 2:')
+        self.score_string = '\n'
+        for choice in q23_choices:
+            self.score_string += '\t\t' + choice
+        self.score_string += '\n'
+        for survey in self.surveys:
+            self.score_string += survey.title + '\t\t'
+            for k,v in survey.q2_responses.items():
+                self.score_string += str(v) + '\t\t'
+            self.score_string += '\n'
+        print(self.score_string)
+
+        print('Question 3:')
+        self.score_string = '\n'
+        for choice in q23_choices:
+            self.score_string += '\t\t' + choice
+        self.score_string += '\n'
+        for survey in self.surveys:
+            self.score_string += survey.title + '\t\t'
+            for k,v in survey.q3_responses.items():
+                self.score_string += str(v) + '\t\t'
+            self.score_string += '\n'
+        print(self.score_string)       
+
+        print('Question 4:')
+        self.score_string = '\n'
+        for choice in q4_choices:
+            self.score_string += '\t\t' + choice
+        self.score_string += '\n'
+        for survey in self.surveys:
+            self.score_string += survey.title + '\t\t'
+            for k,v in survey.q4_responses.items():
+                self.score_string += str(v) + '\t\t'
+            self.score_string += '\n'
+        print(self.score_string)       
 
     def hist_q1(self):
         N = len(list(self.surveys[0].q1_responses.values()))
@@ -161,12 +212,12 @@ class pollScriptUI:
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         
         ind = np.arange(N)  # the x locations for the groups
-        width = 0.15       # the width of the bars
+        width = 0.6 / float(len(self.surveys))       # the width of the bars
 
         fig, ax = plt.subplots()
         ax.set_ylabel('# of Votes')
         ax.set_title('Question 1 Results: How Well Did the Group Demonstrate the Opportunity?')
-        ax.set_xticks(ind + width / 4)
+        ax.set_xticks(ind + (len(self.surveys) * width) / 4)
         ax.set_xticklabels(('Excellent', 'Good', 'Incomplete', 'Not Good'))
         
         for i in range(len(self.surveys)):
@@ -181,12 +232,12 @@ class pollScriptUI:
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         
         ind = np.arange(N)  # the x locations for the groups
-        width = 0.15       # the width of the bars
+        width = 0.6 / float(len(self.surveys))       # the width of the bars
 
         fig, ax = plt.subplots()
         ax.set_ylabel('# of Votes')
         ax.set_title('Question 2 Results: Did the Presenter Send a Clear Message on Conclusions and Recommendations?')
-        ax.set_xticks(ind + width / 3)
+        ax.set_xticks(ind + (len(self.surveys) * width) / 3)
         ax.set_xticklabels(('Yes', 'No', "Don't Know"))
         
         for i in range(len(self.surveys)):
@@ -201,12 +252,13 @@ class pollScriptUI:
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         
         ind = np.arange(N)  # the x locations for the groups
-        width = 0.15       # the width of the bars
+        width = 0.6 / float(len(self.surveys))       # the width of the bars
 
+        
         fig, ax = plt.subplots()
         ax.set_ylabel('# of Votes')
         ax.set_title('Question 3 Results: Do You Find that the Project is Compelling to the Business and Should be a Priority to Halyard Health Acute Pain?')
-        ax.set_xticks(ind + width / 3)
+        ax.set_xticks(ind + (len(self.surveys) * width) / 3)
         ax.set_xticklabels(('Yes', 'No', "Don't Know"))
         
         for i in range(len(self.surveys)):
@@ -220,12 +272,12 @@ class pollScriptUI:
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         
         ind = np.arange(N)  # the x locations for the groups
-        width = 0.15       # the width of the bars
+        width = 0.6 / float(len(self.surveys))       # the width of the bars
 
         fig, ax = plt.subplots()
         ax.set_ylabel('# of Votes')
         ax.set_title("Question 4 Results: Rate the Accuracy of the Group's Scoring Based on the Prioritization Matrix")
-        ax.set_xticks(ind + width / 3)
+        ax.set_xticks(ind + (len(self.surveys) * width) / 3)
         ax.set_xticklabels(('High', 'On Target', "Low"))
         
         for i in range(len(self.surveys)):
@@ -234,14 +286,17 @@ class pollScriptUI:
         ax.legend((rects[i] for i in range(len(rects))), (self.surveys[j].title for j in range(len(rects))))
 
     def hist_generate(self):
-        self.hist_q1()
-        self.hist_q2()
-        self.hist_q3()
-        self.hist_q4()
-        plt.show()
-
+        if len(self.surveys) > 0:            
+            self.hist_q1()
+            self.hist_q2()
+            self.hist_q3()
+            self.hist_q4()
+            plt.show()
+        else:
+            print('No Data to Visualize\n')
     def run(self):
         self.root.mainloop()
 
+        
 if __name__ == "__main__":
     p = pollScriptUI()
