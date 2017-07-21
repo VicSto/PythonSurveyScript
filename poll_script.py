@@ -78,22 +78,29 @@ class SurveyCounter:
             if self.item[3] in self.q4_responses.keys():
                 self.q4_responses[self.item[3]] += 1
 
-            
-            for i in range(0, 4):
-  
-                if(self.item[i] == 'Yes' or self.item[i] == 'Excellent' or self.item[i]== 'On Target'):
+
+            for i in range(0,2):
+                if(self.item[i] == 'Excellent'):
                     self.data[self.items[i]] += float(1)
-                elif(self.item[i] == 'Good' or 'High' or 'Low'):
-                    self.data[self.items[i]] += float(0.5)
-                elif(self.item[i] == 'Incomplete (Needs More Investigation)' or self.item[i] == "Don't Know"):
+                elif(self.item[i] == 'Good' or self.item[i] == 'Yes'):
+                    self.data[self.items[i]] += float(0.75)
+                elif(self.item[i] == 'Incomplete (Needs More Investigation)'):
                     self.data[self.items[i]] += float(0.25)
-                elif(self.item[i] == 'No' or self.item[i] == 'Not Good'):
+                elif(self.item[i] == 'No' or self.item[i] == 'Not Good' or self.item[i] == "Don't Know"):
                     self.data[self.items[i]] += float(0.0)
+            
+            for i in range(2, 4):
+  
+                if(self.item[i] == 'On Target' or self.item[i] == 'Yes' or self.item[i] == 'No'):
+                    self.data[self.items[i]] += float(0.75)
+                elif(self.item[i] == 'High' or self.item[i] == 'Low' or self.item[i] == "Don't Know"):
+                    self.data[self.items[i]] += float(0.25)
+
         self.setScore()
         self.file.close()
 
     def setScore(self):
-        self.score = 0.3*(self.data[self.items[0]] + self.data[self.items[1]] + self.data[self.items[2]]) + 0.1*self.data[self.items[3]]
+        self.score = (self.data[self.items[0]] + self.data[self.items[1]] + self.data[self.items[2]] + self.data[self.items[3]])/(self.num_votes)* 100
 
     def print_results(self):
         print("\nQuestion 1 Results: ")
@@ -148,7 +155,7 @@ class pollScriptUI:
             self.winners = sorted(self.winners, key= lambda winner: winner[1], reverse=True)      
             print("Rankings:\t\t\t\tScore:")
             for i in range(len(self.winners)):
-                print(str(i+1) + ": Team", self.winners[i][0],"\t\t\t\t{:.2f}".format(self.winners[i][1]))
+                print(str(i+1) + ": Team", self.winners[i][0],"\t\t\t\t{:.0f}".format(self.winners[i][1]))
             if(self.winners[0][1] == self.winners[1][1]):
                 print("Result: Tie")
             else:

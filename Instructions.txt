@@ -3,14 +3,23 @@ Instructions:
 Part 1: Initial Setup
 	Step 1: Open PowerPoint labeled Innovation Day Poll.pptx
 	Step 2: Verify that audio button in bottom-left plays the appropriate sound.
-	Step 3: 
+	Step 3: Verify that the Bit.ly link is operational
+	Step 4: Open Typeform page, verify form and clear results.
+	Step 5: Open Script, run on Samples to test all operational.
+	Step 6: Clear all .csv files from "Innovation Day Poll"/ file destination.
 
 
 Part 2: Survey Administration
 	Step 1: Open PowerPoint labeled Innovation Day Poll.pptx
+	Step 2: After survey concludes, enter Typeform page
+	Step 3: Download the results as .csv and click "Save As", set file destination to "Innovation Day Poll/" with Team Name as file name. 
+	Step 4: Clear results on Typeform.  
+
 	
 
-Part 3: Survey Data Collection
-
-
-Part 4: Determining Winner 
+Part 3: Survey Data Compilation
+	Step 1: Run poll_script.py to determine winner
+	Step 2: Migrate all .csv files into InnovationDaySpreadsheet 
+	Step 3: Create 4 Pivots with the data, for each question
+	Step 4: Create 4 Bar Graphs from Pivots, add them to slides.
+	Step 5: Fill in Winners slide, make sure animations work.
